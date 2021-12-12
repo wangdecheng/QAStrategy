@@ -27,5 +27,5 @@ class strategy(QAStrategyStockBase):
         return QA.QA_indicator_MA(self.code_market_data, 2, 5)
 
 if __name__ == '__main__':
-    s = strategy(code=['000001', '000002'], frequence='day', start='2019-01-01', end='2020-04-01', strategy_id='stock_demo6')
+    s = strategy(code=['000001', '000002'], frequence='day', start='2020-01-01', end='2021-04-01', strategy_id='stock_demo7')
     s.run_backtest()
