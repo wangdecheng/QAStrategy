@@ -1,0 +1,15 @@
+{
+    "LOG": {
+        "level": "debug",
+        "handler": "stream"
+    },
+    "DINGTALK": "your dingding token",
+    "TUSHARE": "your tushare token",
+    "SENDMAIL": {
+        "from": "287187910@qq.com",
+        "password": "ephozzedngjecbdi",
+        "to": "287187910@qq.com",
+        "server": "smtp.qq.com",
+        "port": 587
+    }
+}
