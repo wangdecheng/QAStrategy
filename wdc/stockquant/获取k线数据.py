@@ -2,7 +2,7 @@ from stockquant.quant import *
 
 
 config.loads('config.json')
-kline = Market.kline("sh600519", "5m")
+kline = Market.kline("sh600519", "1d")
 print(kline)
 result = Market.shanghai_component_index()		# 获取上证综指
 # result = Market.shenzhen_component_index()		# 获取深圳成指
