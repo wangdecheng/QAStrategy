@@ -1,8 +1,14 @@
 import pymongo
 from wdc.util.WdcMarket import WdcMarket
+from WDCUtil import logger
 import QUANTAXIS as QA
 import pandas as pd
 from pymongo import UpdateOne
+from WDCUtil import WDCMongo
+import traceback
+import sys
+
+import WDCData as wdcData
 
 from QUANTAXIS.QAUtil import (
     DATABASE,
@@ -15,30 +21,24 @@ from QUANTAXIS.QAUtil import (
 
 wdcMarket = WdcMarket()
 def fetch_pankou_from_baostock(code=None,start_date=None,end_date=None):
+    if wdcData.StockPankouDay.exists(code):
+        return
     data = wdcMarket.get_pankou(code,start_date=start_date,end_date=end_date)
+    if data is None:
+        logger.error("not found pan_kou data of code:", code)
     #print(result)
     coll = DATABASE.stock_pankou_day
-    # 初始化更新请求列表
-    update_requests = []
+    print(code, '开始更新盘口===')
+    WDCMongo.save_df(data,coll,['code','date'])
 
-    indexes = set(data.index)
-    for index in indexes:
-        doc = dict(data.loc[index])
-        try:
-            update_requests.append(UpdateOne({'code': doc['code'],'date':doc['date']}, {'$set': doc}, upsert=True))
-
-        except Exception as e:
-            print('Error:', e)
-
-        # 如果抓到了数据
-    if len(update_requests) > 0:
-        update_result = coll.bulk_write(update_requests, ordered=False)
-
-        print('code:%s,盘口更新， 插入：%4d条，更新：%4d条' %
-              (code,update_result.upserted_count, update_result.modified_count), flush=True)
 
 def compute_shizhi(code,start_date=None,end_date=None):
+    if wdcData.StockPankouDay.exists_shizhi(code):
+        return
     pd_stock = QA.QA_fetch_stock_day(code,start_date,end_date,format='p')
+    if(pd_stock is None):
+        logger.error("not found k_day of code:"+code)
+        return
     pd_stock = pd_stock.set_index(['date','code'],drop=False)
     pd_finance = QA.QA_fetch_financial_report_adv(code,start_date,end_date).data
     pd_finance = pd_finance.rename(columns={'report_date': 'date'})
@@ -52,40 +52,30 @@ def compute_shizhi(code,start_date=None,end_date=None):
     #print(pd_shizhi)
 
     coll = DATABASE.stock_pankou_day
-    # 初始化更新请求列表
-    update_requests = []
+    print(code,'开始更新市值===')
+    WDCMongo.save_df(pd_shizhi,coll,['code','date'])
 
-    indexes = set(pd_shizhi.index)
-    for index in indexes:
-        doc = dict(pd_shizhi.loc[index])
-        try:
-            update_requests.append(UpdateOne({'code': doc['code'], 'date': doc['date']}, {'$set': doc}, upsert=True))
-
-        except Exception as e:
-            print('Error:', e)
-
-        # 如果抓到了数据
-    if len(update_requests) > 0:
-        update_result = coll.bulk_write(update_requests, ordered=False)
-
-        print('code:%s,市值更新， 插入：%4d条，更新：%4d条' %
-              (code, update_result.upserted_count, update_result.modified_count), flush=True)
 
 def fetch_stock_pankou(code):
     try:
-        compute_shizhi(code, start_date='2021-01-01', end_date='2021-12-31')
-        #fetch_pankou_from_baostock(code, start_date='1991-01-01', end_date='2021-12-31')
+        compute_shizhi(code, start_date='2007-12-31', end_date='2021-12-31')
+        fetch_pankou_from_baostock(code, start_date='1991-01-01', end_date='2021-12-31')
     except Exception as e:
-        print("error code:",code,e)
-    wdcMarket.logout()
+        traceback.print_exception(type(e), e, sys.exc_info()[2])
+        print("error code:", code, e)
+
 
 if __name__ == '__main__':
     #compute_shizhi('000001', start_date='2007-12-31', end_date='2009-01-01')
     #fetch_pankou_from_baostock('000001', start_date='2007-12-31', end_date='2009-01-01')
 
     df_stocks = QA.QA_fetch_stock_list()
-    #codes = set(df_stocks.index)
-    codes = ['002686']
+    codes = set(df_stocks.index)
+    #codes = ['300522']
+    print('股票总数：',len(codes))
+    count = 0
     for code in codes:
         fetch_stock_pankou(code)
-
+        count = count +1
+    wdcMarket.logout()
+    print('更新总数：',count)

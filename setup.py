@@ -53,10 +53,10 @@ def read(fname):
     return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-NAME = "QAStrategy"
+NAME = "WDCStrategy"
 """
 """
-PACKAGES = ["QAStrategy"]
+PACKAGES = ["WDCStrategy"]
 """
 """
 
