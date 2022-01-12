@@ -17,6 +17,20 @@ def exists(code, field='turn'):
 def exists_shizhi(code):
     return exists(code,'shiZhi')
 
+def query_fundamentals(codes,date):
+    query_condition = {
+        'date': date,
+        'code': {
+            '$in': codes
+        }
+    }
+    item_cursor = _table.find(query_condition)
+    items_from_collection = [item for item in item_cursor]
+    df_data = pd.DataFrame(items_from_collection).drop(['_id'],axis=1)
+    return df_data
+
+
 if __name__ == "__main__":
-    print(exists_shizhi('300522'))
-    print(exists('300522'))
+    #print(exists_shizhi('300522'))
+    #print(exists('300522'))
+    print(query_fundamentals(['603501','603986'],'2018-01-10'))

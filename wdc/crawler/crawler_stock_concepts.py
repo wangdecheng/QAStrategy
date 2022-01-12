@@ -5,9 +5,7 @@ import requests
 from requests.exceptions import ConnectTimeout, SSLError, ReadTimeout, ConnectionError
 import numpy as np
 import pandas as pd
-from GolemQ.fetch.crawler import (
-    headers,
-)
+
 from GolemQ.utils.parameter import (
     AKA,
     INDICATOR_FIELD as FLD,
@@ -764,6 +762,7 @@ def get_stock_concept_kline(symbol: str = None,
 
     # code checking
     symbol = QA_util_code_tolist(symbol)
+    res = None
     if QA_util_date_valid(end):
         cursor = collections.find({
             AKA.SYMBOL: {
@@ -796,9 +795,9 @@ def get_stock_concept_kline(symbol: str = None,
             return QA_util_to_json_from_pandas(res)
         # 多种数据格式
         elif format in ['n', 'N', 'numpy']:
-            return numpy.asarray(res)
+            return np.asarray(res)
         elif format in ['list', 'l', 'L']:
-            return numpy.asarray(res).tolist()
+            return np.asarray(res).tolist()
         else:
             print(
                 "QA Error get_stock_concept_kline format parameter %s is none of  \"P, p, pandas, pd , json, dict , n, N, numpy, list, l, L, !\" " % format)
