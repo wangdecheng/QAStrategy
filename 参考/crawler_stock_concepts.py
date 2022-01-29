@@ -36,7 +36,23 @@ import datetime
 import pymongo
 import traceback
 from tqdm.notebook import trange, tqdm
+from wdc.crawler.common import headers
 
+def pandas_display_formatter():
+    """
+    将pandas.DataFrame的打印效果设置为中文unicode优化
+    """
+    pd.set_option('display.float_format',lambda x : '%.3f' % x)
+    #pd.options.display.float_format = '{:.2%}'.format
+    pd.set_option('display.max_columns', 22)
+    pd.set_option("display.max_rows", 300)
+    pd.set_option('display.width', 220)  # 设置打印宽度
+    pd.set_option('display.unicode.ambiguous_as_wide', True)
+    pd.set_option('display.unicode.east_asian_width', True)
+
+def get_random_stock_concept_components_url():
+    url = "http://{:2d}.push2.eastmoney.com/api/qt/clist/get".format(randint(1, 99))
+    return url
 
 def GQ_fetch_stock_concept_components(concept='BK0066',
                                       delay_gap=0.8,
@@ -47,10 +63,6 @@ def GQ_fetch_stock_concept_components(concept='BK0066',
     抓取东方财富板块概念成分数据
     http://28.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405892331704393758_1629080255227&pn=2&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=b:BK0981+f:!50&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152,f45&_=1629080255234
     '''
-
-    def get_random_stock_concept_components_url():
-        url = "http://{:2d}.push2.eastmoney.com/api/qt/clist/get".format(randint(1, 99))
-        return url
 
     params = {
         "pn": pagenumber,

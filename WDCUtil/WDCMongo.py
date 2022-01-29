@@ -4,10 +4,15 @@ from WDCUtil import WDCFormat
 
 
 def save_df(df_data,db_table,key_fields):
+    """
+    key_fields:以什么字段更新
+    """
     if 'datetime' in df_data.columns:
         df_data.datetime = df_data.datetime.apply(str)
     if 'date' in df_data.columns:
         df_data.date = df_data.date.apply(str).map(lambda x:x[:10])
+
+
     # 初始化更新请求列表
     update_requests = []
 
